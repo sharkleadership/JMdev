@@ -1,7 +1,10 @@
 <?php
-    if (!empty($_POST['choice'])) {
-        $dev = true;
-        require_once('../../php/database.php');
+    $dev = true;
+    $staging = false;
+    $database_link = '../php/database.php';
+    if ($dev) $database_link = './php/sqlite/connect.php';
+    if ($staging) $database_link = '../../php/database.php';
+    require_once($database_link);
         $user_choice = (int) htmlspecialchars($_POST['choice']);
         $poll_num = 1;
         $select = "SELECT * FROM vote
