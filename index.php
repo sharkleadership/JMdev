@@ -1,47 +1,5 @@
-<?php
-    $dev = true;
-    $staging = false;
-    $database_link = '../php/database.php';
-    if ($dev) $database_link = './php/sqlite/connect.php';
-    if ($staging) $database_link = '../../php/database.php';
-    require_once($database_link);
-        $user_choice = (int) htmlspecialchars($_POST['choice']);
-        $poll_num = 1;
-        $select = "SELECT * FROM vote
-                   WHERE id = $poll_num";
-        $row = $pdo->query($select)->fetchAll()[0];
-        if (!is_null($row["tally{$user_choice}"])) {
-            $update = "UPDATE vote 
-                       SET tally{$user_choice} = tally{$user_choice} + 1 
-                       WHERE id = $poll_num;";
-            $pdo->exec($update);
-        }
-        $row["tally{$user_choice}"] += 1;
-
-        $choices = explode(",", $row['choices']);
-        $tallies = ['numbers' => []];
-        $i = 0;
-        foreach ($row as $col => $val) {
-            if (!str_contains($col, 'tally'))
-                continue;
-            if (is_null($val))
-                continue;
-            $tallies[$i] = [ 'tally' => $val ];
-            array_push($tallies['numbers'], $val);
-            $i++;
-        }
-        $i = 0;
-        foreach ($choices as $choice) {
-            $tallies[$i]['choice'] = $choice;
-            $i++;
-        }
-        $num_choices = $i;
-
-        $tally_sum = array_sum($tallies['numbers']);
-        $tally_max = max($tallies['numbers']);
-    }
-?><!DOCTYPE html>
-<!-- JM, 05/07/2026 -->
+<!DOCTYPE html>
+<!-- JM, 08/15/2026 -->
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -84,7 +42,7 @@
                     "Python",
                     "Ruby",
                     "jQuery",
-                    "Web Developement",
+                    "Web Development",
                     "Front-end Web Development"
                 ],
                 "description": "Web Developer",
@@ -576,59 +534,8 @@
                     <p>Voting is a very important act. Whether it is for public office, or even just what to get for dinner tonight, having your voice heard is crucial.</p>
                     
                     <h3 class="icon-before--question">Question</h3>
-                    <p class="question-box">Dogs or cats?</p>
 
-                    <?php if (empty($_POST['choice'])) { ?>
-                        <form action="<?=$_SERVER['PHP_SELF']?>#vote" method="POST">
-
-                            <div class="choices">
-                                <label tabindex="0">
-                                    <input type="radio" id="choice--1" class="voting-radio" name="choice" value="1" required>
-                                    🐶 Dogs
-                                </label>
-                                <label tabindex="0">
-                                    <input type="radio" id="choice--2" class="voting-radio" name="choice" value="2">
-                                    🐱 Cats
-                                </label>
-                                <label tabindex="0" hidden>
-                                    <input type="radio" id="choice--3" class="voting-radio" name="choice" value="3">
-                                </label>
-                                <label tabindex="0" hidden>
-                                    <input type="radio" id="choice--4" class="voting-radio" name="choice" value="4">
-                                </label>
-                            </div> <!-- end .choices -->
-
-                            <input type="submit" class="submit" value="Submit">
-                        </form>
-                        <footer>
-                            <p>Privacy is crucial in all aspects of life, including voting. Your vote is completely confidential.</p>
-                        </footer>
-                    <?php } else { ?>
-                        <p>Thank you for participating! Your vote has been cast.</p>
-                        <figure class="vote-graph">
-                            <div class="vote-graph__graph">
-                                <div class="plurality" data-majority="<?=round((($tally_max / $tally_sum) * 100), 2)?>%" style="--plurality: <?=round((100 - ($tally_max / $tally_sum) * 100), 2)?>%;"></div> <!-- end .plurality -->
-                                <div class="plurality" data-majority="<?=round((100 / $num_choices), 2)?>%" style="--plurality: <?=round(100 - (100 / $num_choices), 2)?>%;"></div> <!-- end .plurality -->
-                                <?php
-                                    for ($i = 0; $i < $num_choices; $i++) {
-                                        $tally = $tallies[$i];
-                                ?>
-                                    <div class="vote-graph__bar<?= ($tally['tally'] == $tally_max) ? ' winning' : '' ?><?= ($i + 1 == $user_choice) ? ' user-choice' :  '' ?>"
-                                    style="--tally: <?=(($tally['tally'] / $tally_sum) * 100)?>%;"
-                                    data-choice="<?=$tally['choice']?>"
-                                    data-tally="<?=$tally['tally']?>">
-                                    </div> <!-- end .vote-graph__bar -->
-                                <?php } ?>
-                                
-                            </div>
-                            <figcaption class="vote-graph__legend">
-                                <ul>
-                                    <li><div class="vote-graph__legend__color winning"></div> <!-- end .vote-graph__legend__color --> - Leading</li>
-                                    <li><div class="vote-graph__legend__color user-choice"></div> <!-- end .vote-graph__legend__color --> - Your Choice</li>
-                                </ul>
-                            </figcaption>
-                        </figure>
-                    <?php } ?>
+                    <?php include './php/vote.php' ?>
                 </section>
             </main>
             <footer class="footer full-bleed">
