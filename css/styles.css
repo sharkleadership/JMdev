@@ -790,7 +790,7 @@ button:disabled ~ a {
 	text-align: center;
 }
 
-.vote form {
+.vote fieldset {
 	display: flex;
 	flex-flow: column;
 	gap: 1em;
@@ -806,6 +806,13 @@ button:disabled ~ a {
 	justify-content: stretch;
 	align-items: stretch;
 	gap: 1em;
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.choices li {
+	display: contents;
 }
 
 .choices label {
@@ -824,6 +831,7 @@ button:disabled ~ a {
 
 input[type="submit"] {
 	display: block;
+	font-family: "Ubuntu", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 	align-self: center;
 	padding: 1rem 2.5rem;
 	background-color: var(--dodgerblue);
@@ -849,87 +857,121 @@ input[type="submit"]:active {
 
 .vote-graph {
 	margin: 0.5rem;
+	position: relative;
 }
 
 .vote-graph__graph {
-	display: flex;
-	justify-content: space-evenly;
-	align-items: flex-end;
 	position: relative;
-	height: 10rem;
-	margin: 3rem auto 1.5rem;
-	border-bottom: 0.125em solid var(--white);
+	list-style-type: none;
+	width: fit-content;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	margin: 0 auto;
+	padding: 0;
+	gap: 0.5rem;
+}
+
+.vote-graph__col {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	position: relative;
+	padding: 0.5rem;
+	gap: 6rem;
+}
+
+.vote-graph__col__choice {
+	font-size: 0.8rem;
+	z-index: 100;
+}
+
+.vote-graph__col__tally {
+	font-size: 0.75rem;
+	z-index: 100;
 }
 
 .vote-graph__bar {
-	position: relative;
-	min-width: 2rem;
-	height: var(--tally);
-	background-color: var(--dodgerblue);
-	border-radius: 0.5rem 0.5rem 0 0;
-	font-family: "Ubuntu", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	appearance: none;
+	position: absolute;
+	z-index: 1;
+	background: none;
+	background-color: var(--navy-blue);
+	border-radius: 0.325rem;
+	inset: 0;
+	width: auto;
+	height: auto;
 }
 
-.vote-graph__bar.winning,
+.vote-graph__bar::-moz-meter-bar {
+	background: none;
+	background-color: hsl(from var(--dodgerblue) h s calc(l - 20));
+	border-radius: 0.25rem;
+}
+
+.vote-graph__bar::-webkit-meter-bar {
+	background: var(--navy-blue);
+	border: 0;
+	border-radius: 0.325rem;
+	height: 200%;
+}
+
+.vote-graph__bar::-webkit-meter-optimum-value {
+	background: hsl(from var(--dodgerblue) h s calc(l - 20));
+	border-radius: 0.25rem;
+}
+
+.vote-graph__col::before {
+	content: attr(data-choice);
+	display: block;
+	z-index: 100;
+}
+
+.vote-graph__col::after {
+	content: attr(data-tally);
+	display: block;
+	font-size: 0.75em;
+	z-index: 100;
+}
+
+.vote-graph__bar.winning::-moz-meter-bar,
 .vote-graph__legend__color.winning {
-	background-color: var(--red);
+	background-color: hsl(from var(--red) h calc(s - 30) calc(l - 20));
 }
 
-.vote-graph__bar.user-choice,
+.vote-graph__bar.user-choice::-moz-meter-bar,
 .vote-graph__legend__color.user-choice {
-	background-color: var(--orange);
+	background-color: hsl(from var(--orange) h calc(s - 30) calc(l - 20));
 }
 
-.vote-graph__bar.winning.user-choice {
-	background-color: var(--red);
-	background-image: repeating-linear-gradient(
+.vote-graph__bar.winning::-webkit-meter-optimum-value {
+	background: hsl(from var(--red) h calc(s - 30) calc(l - 20));
+}
+
+.vote-graph__bar.user-choice::-webkit-meter-optimum-value {
+	background: hsl(from var(--orange) h calc(s - 30) calc(l - 20));
+}
+
+.vote-graph__bar.winning.user-choice::-webkit-meter-optimum-value {
+	/* background: var(--red); */
+	background: repeating-linear-gradient(
 		125deg,
-		var(--red) 0%,
-		var(--red) 30%,
-		var(--orange) 30%,
-		var(--orange) 60%
+		hsl(from var(--red) h calc(s - 30) calc(l - 20)) 0%,
+		hsl(from var(--red) h calc(s - 30) calc(l - 20)) 30%,
+		hsl(from var(--orange) h calc(s - 30) calc(l - 20)) 30%,
+		hsl(from var(--orange) h calc(s - 30) calc(l - 20)) 60%
 	);
 }
 
-.vote-graph__bar::before {
-	content: attr(data-choice);
-	display: block;
-	position: absolute;
-	z-index: 1000;
-	top: 0;
-	transform: translateY(-2.5rem) rotate(-50deg);
-}
-
-.vote-graph__bar::after {
-	content: attr(data-tally);
-	display: block;
-	position: absolute;
-	z-index: 1000;
-	bottom: 0;
-	transform: translateY(1.5rem);
-	width: 100%;
-	text-align: center;
-}
-
-.vote-graph__graph .plurality {
-	position: absolute;
-	z-index: 100;
-	top: var(--plurality);
-	width: 100%;
-	margin: 0;
-	border: dashed 0.0075em hsl(from var(--white) h s l / 0.5);
-}
-
-.vote-graph__graph .plurality::before {
-	content: attr(data-majority);
-	position: absolute;
-	padding: 0.125rem 0.25rem;
-	transform: translateX(0.25rem) translateY(-50%);
-	background-color: hsl(from var(--dodgerblue) h calc(s - 70) l);
-	border-radius: 0.5rem;
-	font-family: "Ubuntu", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-	font-size: 0.9rem;
-	color: var(--navy-blue);
+.vote-graph__bar.winning.user-choice::-moz-meter-bar {
+	background-color: var(--red);
+	background-image: repeating-linear-gradient(
+		125deg,
+		hsl(from var(--red) h calc(s - 30) calc(l - 20)) 0%,
+		hsl(from var(--red) h calc(s - 30) calc(l - 20)) 30%,
+		hsl(from var(--orange) h calc(s - 30) calc(l - 20)) 30%,
+		hsl(from var(--orange) h calc(s - 30) calc(l - 20)) 60%
+	);
 }
 
 .vote-graph__legend {
