@@ -1,5 +1,6 @@
+<!-- JM, 08/18/26 -->
 <?php
-    if (!empty($_POST['question'] && !empty($_POST['choices']))) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['question'] && !empty($_POST['choices']))) {
         $command = true;
         require_once('connect.php');
 
@@ -37,7 +38,6 @@
         try {
             $stmt = $pdo->prepare($insert);
             $stmt->execute($variables);
-
         } catch (PDOException $e) {
             $error_message = $e->getMessage();
             echo $error_message;

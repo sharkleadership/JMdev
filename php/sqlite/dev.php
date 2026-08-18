@@ -1,8 +1,11 @@
 <?php
 
-    if ($_POST['action'] === 'insert') require_once('insert-row.php');
+    if ($_POST['action'] === 'insert') require_once('./commands/insert-row.php');
+    if ($_POST['action'] === 'set') require_once('./commands/set-row.php');
+    if ($_POST['action'] === 'reset') require_once('./commands/reset-row.php');
 
 ?><!DOCTYPE html>
+<!-- JM, 08/18/26 -->
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -45,6 +48,78 @@
                 
                 <input type="hidden" name="action" value="insert">
                 <input type="submit" value="Insert">
+            </fieldset>
+        </form>
+
+        <form action="<?=$_SERVER['PHP_SELF']?>" method="POST">
+            <fieldset>
+                <legend>Set Row</legend>
+
+                <select name="row" id="set-row">
+                    <?php
+                        $command = true;
+                        require_once('connect.php');
+                        $select = "SELECT * FROM vote;";
+                        $rows = $pdo->query($select)->fetchAll();
+                        $row1 = $rows[0];
+                        foreach ($rows as $col):
+                    ?>
+                        <option value="<?=$col['id']?>"><?=$col['id']?>: <?=$col['question']?></option>
+                    <?php endforeach; ?>
+                </select>
+                
+                <?php for ($i = 1; $i <= 4; $i++): ?>
+                    <input 
+                        type="number" 
+                        name="tally<?=$i?>" 
+                        class="tally" 
+                        id="tally<?=$i?>" 
+                        <?=(!is_null($row1["tally$i"]) || $row1["tally$i"] === 0) ? '' : 'disabled'?>
+                        value="<?=$row1["tally$i"]?>">
+                <?php endfor; ?>
+
+                <input type="hidden" name="action" value="set">
+                <input type="submit" value="Set">
+            </fieldset>
+            <script>
+                const select = document.querySelector("#set-row");
+                
+                const tallyEls = document.querySelectorAll(".tally");
+
+                select.addEventListener("change", (e) => {
+                    fetch(`./commands/get-row.php?row=${select.value}`, { headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }})
+                    .then((res) => res.json())
+                    .then((json) => {
+                        tallyEls.forEach((tal) => {
+                            tal.value = json[tal.id];
+                            tal.disabled = (!json[tal.id] && json[tal.id] !== 0);
+                        });
+                    });
+                });
+            </script>
+        </form>
+
+        <form action="<?=$_SERVER['PHP_SELF']?>" method="POST">
+            <fieldset>
+                <legend>Reset Row</legend>
+
+                <select name="row" id="reset-row">
+                    <?php
+                        $command = true;
+                        require_once('connect.php');
+                        $select = "SELECT id, question FROM vote;";
+                        $rows = $pdo->query($select)->fetchAll();
+                        foreach ($rows as $col):
+                    ?>
+                    <option value="<?=$col['id']?>"><?=$col['id']?>: <?=$col['question']?></option>
+                    <?php endforeach; ?>
+                </select>
+                
+                <input type="hidden" name="action" value="reset">
+                <input type="submit" value="Reset">
             </fieldset>
         </form>
 
